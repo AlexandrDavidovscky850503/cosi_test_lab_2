@@ -11,7 +11,7 @@ class FastFurieTransfsorm:
         self.counter = 0
         resultFunction = self.fastFurieTransformRecursive(self,function,direction)
 
-        if direction == -1:
+        if direction == 1:
             valuesLenght = len(function)
             for i in range(valuesLenght):
                 resultFunction[i] /= valuesLenght
@@ -54,15 +54,24 @@ class CorrelationWithConvolution:
         length = len(firstFunction)
         CorrelationWithConvolution.counter = 0
 
+        print("====")
+
         result = []
         for i in range(length):
             temp = 0
             for j in range(length):
-                k = (i + (j * operation)) % length
+                k = myNumpy.abs(i + (j * operation)) % length
+                # k1 = (i + (j * operation)) % length
+                # print(k)
+                if (i + (j * operation)) < 0:
+                    k = k * (-1)
+
+                print(k)
                 temp += firstFunction[j] * secondFunction[k]
 
                 CorrelationWithConvolution.counter += 1
 
+            temp /= length
             result.append(temp)
 
         return result
@@ -71,7 +80,6 @@ class CorrelationWithConvolution:
     def FFTCorrelationWithConvolutionOperation(firstFunction, secondFuncton, operation):
 
         length = len(firstFunction)
-
 
         CorrelationWithConvolution.counter = 0
 
@@ -98,7 +106,7 @@ class CorrelationWithConvolution:
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     N = 16
-    arguments = myNumpy.arange(0, N) * myNumpy.pi/10
+    arguments = myNumpy.arange(0, 16) * 2 * myNumpy.pi / N
     firstFunction = list(map(lambda x: myNumpy.cos(x), arguments))
     secondFunction = list(map(lambda x: myNumpy.sin(3 * x), arguments))
    # print('    : {}'.format(arguments))
