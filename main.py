@@ -5,10 +5,12 @@ import matplotlib.pyplot as plt # для построения графиков
 
 
 class FastFurieTransfsorm:
-    counter = 0
+    mulCounter = 0
+    addCounter = 0
     @staticmethod # можно вызывать без создания экземпляра класса
     def fastFurieTransform(self, function, direction): # self чтобы ссылаться на самих себя
-        self.counter = 0
+        self.mulCounter = 0
+        self.addCounter = 0
         resultFunction = self.fastFurieTransformRecursive(self,function,direction)
 
         if direction == 1:
@@ -34,7 +36,8 @@ class FastFurieTransfsorm:
             firstHalf[i] = function[i] + function[i+int(valuesLenght/2)]
             secondtHalf[i] = (function[i] - function[i+int(valuesLenght/2)])*w
             w=w*Wn
-            self.counter +=1
+            self.mulCounter += 1
+            self.addCounter += 2
 
         evenResult = self.fastFurieTransformRecursive(self,firstHalf,direction) # Рекурсивный вызов БПФ для каждой из частей
         oddResult = self.fastFurieTransformRecursive(self,secondtHalf,direction)
@@ -47,14 +50,16 @@ class FastFurieTransfsorm:
         return result
 
 class CorrelationWithConvolution:
-    counter = 0
+    mulCounter = 0
+    addCounter = 0
     @staticmethod
     def correlationWithConvolutionOperation(firstFunction,secondFunction,operation):
 
         length = len(firstFunction)
-        CorrelationWithConvolution.counter = 0
+        CorrelationWithConvolution.mulCounter = 0
+        CorrelationWithConvolution.addCounter = 0
 
-        print("====")
+        # print("====")
 
         result = []
         for i in range(length):
@@ -66,10 +71,11 @@ class CorrelationWithConvolution:
                 if (i + (j * operation)) < 0:
                     k = k * (-1)
 
-                print(k)
+                # print(k)
                 temp += firstFunction[j] * secondFunction[k]
 
-                CorrelationWithConvolution.counter += 1
+                CorrelationWithConvolution.mulCounter += 1
+                CorrelationWithConvolution.addCounter += 1
 
             temp /= length
             result.append(temp)
@@ -81,23 +87,27 @@ class CorrelationWithConvolution:
 
         length = len(firstFunction)
 
-        CorrelationWithConvolution.counter = 0
+        CorrelationWithConvolution.mulCounter = 0
+        CorrelationWithConvolution.addCounter = 0
 
         firstFunctionFastFurieTransform = FastFurieTransfsorm.fastFurieTransform(FastFurieTransfsorm, firstFunction, 1)
-        CorrelationWithConvolution.counter += FastFurieTransfsorm.counter
+        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter
+        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
 
         secondFunctionFastFurieTransform = FastFurieTransfsorm.fastFurieTransform(FastFurieTransfsorm, secondFuncton, 1)
-        CorrelationWithConvolution.counter += FastFurieTransfsorm.counter
+        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter
+        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
 
         firstFunctionFastFurieTransformConjugate = firstFunctionFastFurieTransform
         if operation == 1:
             firstFunctionFastFurieTransformConjugate = myNumpy.conj(firstFunctionFastFurieTransform)
 
         temp = myNumpy.multiply(firstFunctionFastFurieTransformConjugate, secondFunctionFastFurieTransform)
-        CorrelationWithConvolution.counter += length
+        CorrelationWithConvolution.mulCounter += length
 
         result = FastFurieTransfsorm.fastFurieTransform(FastFurieTransfsorm, temp, -1)
-        CorrelationWithConvolution.counter += FastFurieTransfsorm.counter
+        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter
+        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
 
         return result
 
@@ -112,14 +122,18 @@ if __name__ == '__main__':
    # print('    : {}'.format(arguments))
 
     correlation = CorrelationWithConvolution.correlationWithConvolutionOperation(firstFunction, secondFunction, 1)
-    print('Сложность корреляции: {}'.format(CorrelationWithConvolution.counter))
+    print('Сложность корреляции (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
+    print('Сложность корреляции (сложение): {}'.format(CorrelationWithConvolution.addCounter))
     convolution = CorrelationWithConvolution.correlationWithConvolutionOperation(firstFunction, secondFunction, -1)
-    print('Сложность свертки: {}'.format(CorrelationWithConvolution.counter))
+    print('Сложность свертки (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
+    print('Сложность свертки (сложение): {}'.format(CorrelationWithConvolution.addCounter))
 
     correlationWithFastFurieTransform = CorrelationWithConvolution.FFTCorrelationWithConvolutionOperation(firstFunction, secondFunction, 1)
-    print('Сложность корреляции c БПФ: {}'.format(CorrelationWithConvolution.counter))
+    print('Сложность корреляции c БПФ (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
+    print('Сложность корреляции c БПФ (сложение): {}'.format(CorrelationWithConvolution.addCounter))
     convolutionWithFastFurieTransform = CorrelationWithConvolution.FFTCorrelationWithConvolutionOperation(firstFunction, secondFunction, -1)
-    print('Сложность свертки c БПФ: {}'.format(CorrelationWithConvolution.counter))
+    print('Сложность свертки c БПФ (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
+    print('Сложность свертки c БПФ (сложение): {}'.format(CorrelationWithConvolution.addCounter))
 
     fig = plt.figure()
     ax_1 = fig.add_subplot(3, 3, 1)
