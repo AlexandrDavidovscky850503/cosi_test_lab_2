@@ -1,15 +1,12 @@
-# # This is a sample Python script.
+# This is a sample Python script.
+
 import numpy as myNumpy  # общие математические и числовые операции
 import matplotlib.pyplot as plt  # для построения графиков
 
-<<<<<<< HEAD
+
 class FastFurieTransfsorm: # класс ответственный за быстрое преобразование Фурье
     mulCounter = 0 # счётчик умножений
     addCounter = 0 # счётчик сложений
-=======
-import numpy as myNumpy  # общие математические и числовые операции
-import matplotlib.pyplot as plt  # для построения графиков
->>>>>>> 0dedee92aa4c27b34e9e2cfa019dbee884c29309
 
     @staticmethod  # можно вызывать без создания экземпляра класса
     def fastFourierTransform(self, function, direction):  # self чтобы ссылаться на самих себя
@@ -17,21 +14,7 @@ import matplotlib.pyplot as plt  # для построения графиков
         self.addCounter = 0
         resultFunction = self.fastFourierTransformRecursive(self, function, direction) # вызов рекурсивной функции FFT
 
-<<<<<<< HEAD
         if direction == 1: # если делали прямое преобразование, делим на N каждый полученный элемент после FFT
-=======
-class FastFurieTransfsorm:
-    mulCounter = 0
-    addCounter = 0
-
-    @staticmethod  # можно вызывать без создания экземпляра класса
-    def fastFourierTransform(self, function, direction):  # self чтобы ссылаться на самих себя
-        self.mulCounter = 0
-        self.addCounter = 0
-        resultFunction = self.fastFourierTransformRecursive(self, function, direction)
-
-        if direction == 1:
->>>>>>> 0dedee92aa4c27b34e9e2cfa019dbee884c29309
             valuesLenght = len(function)
             for i in range(valuesLenght):
                 resultFunction[i] /= valuesLenght
@@ -69,18 +52,8 @@ class FastFurieTransfsorm:
 
         return result
 
-<<<<<<< HEAD
-=======
 
-class CorrelationWithConvolution:
-    mulCounter = 0
-    addCounter = 0
-
-    @staticmethod
-    def correlationWithConvolutionOperation(firstFunction, secondFunction, operation):
->>>>>>> 0dedee92aa4c27b34e9e2cfa019dbee884c29309
-
-class CorrelationWithConvolution:# класс ответсвенный за исполнение корреляции с сверткой
+class CorrelationWithConvolution:# класс ответственный за исполнение корреляции с сверткой
     mulCounter = 0 # счётчик умножений
     addCounter = 0 # счётчик сложений
 
@@ -88,18 +61,13 @@ class CorrelationWithConvolution:# класс ответсвенный за ис
     def correlationWithConvolutionOperation(firstFunction, secondFunction, operation): # исполнение корреляции с
                                                                                        # свёрткой
         length = len(firstFunction)
-<<<<<<< HEAD
         CorrelationWithConvolution.mulCounter = 0 # обнуляем счетчики
-=======
-        CorrelationWithConvolution.mulCounter = 0
->>>>>>> 0dedee92aa4c27b34e9e2cfa019dbee884c29309
         CorrelationWithConvolution.addCounter = 0
 
         result = []  # результирующий массив
         for i in range(length):
             temp = 0
             for j in range(length):
-<<<<<<< HEAD
                 k = myNumpy.abs(i + (j * operation)) % length # получаем индекс второго элемента
                 if (i + (j * operation)) < 0:
                     k = k * (-1)
@@ -110,20 +78,7 @@ class CorrelationWithConvolution:# класс ответсвенный за ис
                 CorrelationWithConvolution.addCounter += 1
 
             temp /= length
-            result.append(temp)  # добавляем в результирующий масив полученное значение
-=======
-                k = myNumpy.abs(i + (j * operation)) % length
-                if (i + (j * operation)) < 0:
-                    k = k * (-1)
-
-                temp += firstFunction[j] * secondFunction[k]
-
-                CorrelationWithConvolution.mulCounter += 1
-                CorrelationWithConvolution.addCounter += 1
-
-            temp /= length
-            result.append(temp)
->>>>>>> 0dedee92aa4c27b34e9e2cfa019dbee884c29309
+            result.append(temp)  # добавляем в результирующий масcив полученное значение
 
         return result
 
@@ -132,7 +87,6 @@ class CorrelationWithConvolution:# класс ответсвенный за ис
                                                                                         # свёрткой(FFT)
         length = len(firstFunction)
 
-<<<<<<< HEAD
         CorrelationWithConvolution.mulCounter = 0 # обнуляем счетчики
         CorrelationWithConvolution.addCounter = 0
 
@@ -155,30 +109,6 @@ class CorrelationWithConvolution:# класс ответсвенный за ис
 
         result = FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, temp, -1) # обратное FFT
         CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter # увеличиваем счетчики
-=======
-        CorrelationWithConvolution.mulCounter = 0
-        CorrelationWithConvolution.addCounter = 0
-
-        firstFunctionFastFourierTransform = \
-            FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, firstFunction, 1)
-        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter
-        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
-
-        secondFunctionFastFourierTransform = \
-            FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, secondFuncton, 1)
-        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter
-        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
-
-        firstFunctionFastFourierTransformConjugate = firstFunctionFastFourierTransform
-        if operation == 1:
-            firstFunctionFastFourierTransformConjugate = myNumpy.conj(firstFunctionFastFourierTransform)
-
-        temp = myNumpy.multiply(firstFunctionFastFourierTransformConjugate, secondFunctionFastFourierTransform)
-        CorrelationWithConvolution.mulCounter += length
-
-        result = FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, temp, -1)
-        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter
->>>>>>> 0dedee92aa4c27b34e9e2cfa019dbee884c29309
         CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
 
         return result
