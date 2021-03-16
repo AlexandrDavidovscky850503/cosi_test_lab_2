@@ -1,178 +1,126 @@
 # This is a sample Python script.
 
-import numpy as myNumpy  # общие математические и числовые операции
+import numpy as np  # общие математические и числовые операции
 import matplotlib.pyplot as plt  # для построения графиков
 
 
-class FastFurieTransfsorm: # класс ответственный за быстрое преобразование Фурье
-    mulCounter = 0 # счётчик умножений
-    addCounter = 0 # счётчик сложений
+def sequencyReordering(inputData):
+    inputLength = len(inputData)
 
-    @staticmethod  # можно вызывать без создания экземпляра класса
-    def fastFourierTransform(self, function, direction):  # self чтобы ссылаться на самих себя
-        self.mulCounter = 0 # обнуляем счетчики
-        self.addCounter = 0
-        resultFunction = self.fastFourierTransformRecursive(self, function, direction) # вызов рекурсивной функции FFT
+    if isPowerOfTwo(inputLength):
+        length = inputLength
+        bitsInLenght = int(np.log2(length))
+    else:
+        bitsInLenght = np.log2(inputLength)
+        length = 1 << bitsInLenght
 
-        if direction == 1: # если делали прямое преобразование, делим на N каждый полученный элемент после FFT
-            valuesLenght = len(function)
-            for i in range(valuesLenght):
-                resultFunction[i] /= valuesLenght
+    data = inputData[0:length]
+    for i in range(length):
+        data[i] = inputData[grayToBinary(bitsRevers(i, bitsInLenght))]
 
-        return resultFunction
-
-    @staticmethod  # можно вызывать без создания экземпляра класса
-    def fastFourierTransformRecursive(self, function, direction):
-        valuesLength = len(function)
-
-        if valuesLength == 1:
-            return function
-        firstHalf = [complex(0, 0)] * (int(valuesLength / 2))  # Подготовка массивов для операции "Бабочка"
-        secondtHalf = [complex(0, 0)] * (int(valuesLength / 2))
-
-        # Присвоить Wn значение главного комплексного корня N-й степени из единицы
-        Wn = complex(myNumpy.cos(2*myNumpy.pi/valuesLength), direction * myNumpy.sin(2*myNumpy.pi/valuesLength))
-        w = 1  # Присвоить w = 1
-        result = [complex(0,0)]*valuesLength
-        for i in range(int(valuesLength/2)):  # Операция "Бабочка"
-            firstHalf[i] = function[i] + function[i + int(valuesLength / 2)]
-            secondtHalf[i] = (function[i] - function[i + int(valuesLength / 2)]) * w
-            w = w * Wn
-            self.mulCounter += 1
-            self.addCounter += 2
-
-        evenResult = \
-            self.fastFourierTransformRecursive(self, firstHalf, direction)  # Рекурсивный вызов БПФ для каждой из частей
-        oddResult = self.fastFourierTransformRecursive(self, secondtHalf, direction)
-        for i in range(valuesLength):  # Объединение результатов
-            if i % 2 == 0:
-                result[i] = evenResult[int(i / 2)]
-            else:
-                result[i] = oddResult[int(i / 2)]
-
-        return result
+    return data
 
 
-class CorrelationWithConvolution:# класс ответственный за исполнение корреляции с сверткой
-    mulCounter = 0 # счётчик умножений
-    addCounter = 0 # счётчик сложений
+def isPowerOfTwo(n):
+    return n > 1 and (n & (n - 1)) == 0
 
-    @staticmethod
-    def correlationWithConvolutionOperation(firstFunction, secondFunction, operation): # исполнение корреляции с
-                                                                                       # свёрткой
-        length = len(firstFunction)
-        CorrelationWithConvolution.mulCounter = 0 # обнуляем счетчики
-        CorrelationWithConvolution.addCounter = 0
 
-        result = []  # результирующий массив
-        for i in range(length):
-            temp = 0
-            for j in range(length):
-                k = myNumpy.abs(i + (j * operation)) % length # получаем индекс второго элемента
-                if (i + (j * operation)) < 0:
-                    k = k * (-1)
+def fwht(inputFunction):
+    inputLenght = len(inputFunction)
 
-                temp += firstFunction[j] * secondFunction[k] # функция корреляции и свертки
+    if isPowerOfTwo(inputLenght):
+        length = inputLenght
+        bitsInLength = int(np.log2(length))
+    else:
+        bitsInLength = np.log2(inputLenght)
+        length = 1 << bitsInLength
 
-                CorrelationWithConvolution.mulCounter += 1 # увеличиваем счетчики
-                CorrelationWithConvolution.addCounter += 1
+    data = sequencyReordering(inputFunction)
 
-            temp /= length
-            result.append(temp)  # добавляем в результирующий масcив полученное значение
+    for ldm in range(bitsInLength, 0, -1):
+        m = 2 ** ldm
+        mh = int(m / 2)
+        for k in range(mh):
+            for r in range(0, length, m):
+                u = data[r + k]
+                v = data[r + k + mh]
 
-        return result
+                data[r + k] = u + v
+                data[r + k + mh] = u - v
 
-    @staticmethod
-    def FFTCorrelationWithConvolutionOperation(firstFunction, secondFuncton, operation):# исполнение корреляции(FFT) с
-                                                                                        # свёрткой(FFT)
-        length = len(firstFunction)
 
-        CorrelationWithConvolution.mulCounter = 0 # обнуляем счетчики
-        CorrelationWithConvolution.addCounter = 0
+    data = list(np.divide(data, length))
 
-        firstFunctionFastFourierTransform = \
-            FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, firstFunction, 1) # вызов прямого FFT
-        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter # увеличиваем счетчики
-        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
+    return data
 
-        secondFunctionFastFourierTransform = \
-            FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, secondFuncton, 1) # вызов прямого FFT
-        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter # увеличиваем счетчики
-        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
+def bitsRevers(n, numberOfBits):
+    reverseBits = 0
 
-        firstFunctionFastFourierTransformConjugate = firstFunctionFastFourierTransform # результат компл. сопр.
-        if operation == 1: # если корреляция то исполняем компл. сопр.
-            firstFunctionFastFourierTransformConjugate = myNumpy.conj(firstFunctionFastFourierTransform)
+    for i in range(numberOfBits):
+        next_bit = n & 1
+        n >>= 1
 
-        temp = myNumpy.multiply(firstFunctionFastFourierTransformConjugate, secondFunctionFastFourierTransform)# умножение
-        CorrelationWithConvolution.mulCounter += length # увеличиваем счетчик на число элементов после умножения
+        reverseBits <<= 1
+        reverseBits |= next_bit
 
-        result = FastFurieTransfsorm.fastFourierTransform(FastFurieTransfsorm, temp, -1) # обратное FFT
-        CorrelationWithConvolution.mulCounter += FastFurieTransfsorm.mulCounter # увеличиваем счетчики
-        CorrelationWithConvolution.addCounter += FastFurieTransfsorm.addCounter
+    return reverseBits
 
-        return result
+
+def grayToBinary(num):
+    mask = num
+    while mask != 0:
+        mask >>= 1
+        num ^= mask
+
+    return num
+
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     N = 16
-    arguments = myNumpy.arange(0, 16) * 2 * myNumpy.pi / N
-    firstFunction = list(map(lambda x: myNumpy.cos(x), arguments))
-    secondFunction = list(map(lambda x: myNumpy.sin(3 * x), arguments))
+    arguments = np.arange(0, N) * 2 * np.pi / N
+    function = list(map(lambda x: np.sin(3*x) + np.cos(x), arguments))
+    result = fwht(function)
 
-    correlation = CorrelationWithConvolution.correlationWithConvolutionOperation(firstFunction, secondFunction, 1)
-    print('Сложность корреляции (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
-    print('Сложность корреляции (сложение): {}'.format(CorrelationWithConvolution.addCounter))
-    convolution = CorrelationWithConvolution.correlationWithConvolutionOperation(firstFunction, secondFunction, -1)
-    print('Сложность свертки (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
-    print('Сложность свертки (сложение): {}'.format(CorrelationWithConvolution.addCounter))
 
-    correlationWithFastFourierTransform = \
-        CorrelationWithConvolution.FFTCorrelationWithConvolutionOperation(firstFunction, secondFunction, 1)
-    print('Сложность корреляции c БПФ (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
-    print('Сложность корреляции c БПФ (сложение): {}'.format(CorrelationWithConvolution.addCounter))
-    convolutionWithFastFourierTransform = \
-        CorrelationWithConvolution.FFTCorrelationWithConvolutionOperation(firstFunction, secondFunction, -1)
-    print('Сложность свертки c БПФ (умножение): {}'.format(CorrelationWithConvolution.mulCounter))
-    print('Сложность свертки c БПФ (сложение): {}'.format(CorrelationWithConvolution.addCounter))
 
     fig = plt.figure()
     ax_1 = fig.add_subplot(3, 3, 1)
-    ax_2 = fig.add_subplot(3, 3, 2)
-    ax_3 = fig.add_subplot(3, 3, 3)
+    # ax_2 = fig.add_subplot(3, 3, 2)
+    # ax_3 = fig.add_subplot(3, 3, 3)
     ax_4 = fig.add_subplot(3, 3, 7)
-    ax_5 = fig.add_subplot(3, 3, 8)
-    ax_6 = fig.add_subplot(3, 3, 9)
-
-    ax_1.plot(arguments, firstFunction)
-    ax_1.set(title='cos(x)')
-    ax_1.scatter(arguments, firstFunction, color='orange')
+    # ax_5 = fig.add_subplot(3, 3, 8)
+    # ax_6 = fig.add_subplot(3, 3, 9)
+    #
+    ax_1.plot(arguments, function)
+    ax_1.set(title='sin(3x)+cos(x)')
+    ax_1.scatter(arguments, function, color='orange')
     ax_1.grid(True)
-
-    ax_4.plot(arguments, secondFunction)
-    ax_4.set(title='sin(3x)')
-    ax_4.scatter(arguments, secondFunction, color='orange')
+    #
+    ax_4.plot(arguments, result)
+    ax_4.set(title='fwht')
+    ax_4.scatter(arguments, result, color='orange')
     ax_4.grid(True)
-
-    ax_2.plot(arguments, correlation)
-    ax_2.set(title='Корреляция')
-    ax_2.scatter(arguments, correlation, color='orange')
-    ax_2.grid(True)
-
-    ax_3.plot(arguments, convolution)
-    ax_3.set(title='Свертка')
-    ax_3.scatter(arguments, convolution, color='orange')
-    ax_3.grid(True)
-
-    ax_5.plot(arguments, correlationWithFastFourierTransform)
-    ax_5.set(title='Корреляция с БПФ')
-    ax_5.scatter(arguments, correlationWithFastFourierTransform, color='orange')
-    ax_5.grid(True)
-
-    ax_6.plot(arguments, convolutionWithFastFourierTransform)
-    ax_6.set(title='Свертка с БПФ')
-    ax_6.scatter(arguments, convolutionWithFastFourierTransform, color='orange')
-    ax_6.grid(True)
-
+    #
+    # ax_2.plot(arguments, correlation)
+    # ax_2.set(title='Корреляция')
+    # ax_2.scatter(arguments, correlation, color='orange')
+    # ax_2.grid(True)
+    #
+    # ax_3.plot(arguments, convolution)
+    # ax_3.set(title='Свертка')
+    # ax_3.scatter(arguments, convolution, color='orange')
+    # ax_3.grid(True)
+    #
+    # ax_5.plot(arguments, correlationWithFastFourierTransform)
+    # ax_5.set(title='Корреляция с БПФ')
+    # ax_5.scatter(arguments, correlationWithFastFourierTransform, color='orange')
+    # ax_5.grid(True)
+    #
+    # ax_6.plot(arguments, convolutionWithFastFourierTransform)
+    # ax_6.set(title='Свертка с БПФ')
+    # ax_6.scatter(arguments, convolutionWithFastFourierTransform, color='orange')
+    # ax_6.grid(True)
+    #
     plt.show()
