@@ -1,5 +1,3 @@
-# This is a sample Python script.
-
 import numpy as np  # общие математические и числовые операции
 import matplotlib.pyplot as plt  # для построения графиков
 import sympy as sm
@@ -7,10 +5,6 @@ import sympy as sm
 
 def fwht(function):
     result = fwht_rec(function)
-
-    values_length = len(function)
-    # for i in range(values_length):
-    #     result[i] /= values_length
 
     return result
 
@@ -35,7 +29,6 @@ def fwht_rec(function):
     return result
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     N = 16
     arguments = np.arange(0, N) * 2 * np.pi / N
