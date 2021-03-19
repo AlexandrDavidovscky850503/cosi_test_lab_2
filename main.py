@@ -3,12 +3,6 @@ import matplotlib.pyplot as plt  # для построения графиков
 import sympy as sm
 
 
-def fwht(function):
-    result = fwht_rec(function)
-
-    return result
-
-
 def fwht_rec(function):
     values_length = len(function)
 
@@ -17,14 +11,14 @@ def fwht_rec(function):
     first_half = []  # Подготовка массивов для операции "Бабочка"
     second_half = []
 
-    for i in range(int(values_length / 2)):  # Операция "Бабочка"
+    for i in range(int(values_length / 2)):  # Сложение и вычитание элементов
         first_half.append(function[i] + function[i + int(values_length / 2)])
         second_half.append(function[i] - function[i + int(values_length / 2)])
 
-    first_result = fwht_rec(first_half)  # Рекурсивный вызов БПФ для каждой из частей
+    first_result = fwht_rec(first_half)  # Рекурсивный вызов ДПУ для каждой из частей
     second_result = fwht_rec(second_half)
 
-    result = first_result + second_result
+    result = first_result + second_result  # Объединить результаты
 
     return result
 
@@ -33,7 +27,7 @@ if __name__ == '__main__':
     N = 16
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
-    result = fwht(function)
+    result = fwht_rec(function)
     print(f'fwht: {result}')
     sympy_res = sm.fwht(function)
     print(f'sympy.fwht: {sympy_res}')
