@@ -1,6 +1,16 @@
 import numpy as np  # общие математические и числовые операции
 import matplotlib.pyplot as plt  # для построения графиков
-import sympy as sm
+import sympy as sm  # для функции fwht()
+
+
+def fwht(function):
+    result = fwht_rec(function)
+
+    values_length = len(function)
+    for i in range(values_length):
+        result[i] /= values_length
+
+    return result
 
 
 def fwht_rec(function):
@@ -8,14 +18,14 @@ def fwht_rec(function):
 
     if values_length == 1:  # Если длина вектора равна 1, вернуть function
         return function
-    first_half = []  # Подготовка массивов для операции "Бабочка"
+    first_half = []  # Подготовка массивов
     second_half = []
 
     for i in range(int(values_length / 2)):  # Сложение и вычитание элементов
         first_half.append(function[i] + function[i + int(values_length / 2)])
         second_half.append(function[i] - function[i + int(values_length / 2)])
 
-    first_result = fwht_rec(first_half)  # Рекурсивный вызов ДПУ для каждой из частей
+    first_result = fwht_rec(first_half)  # Рекурсивный вызов БПУ для каждой из частей
     second_result = fwht_rec(second_half)
 
     result = first_result + second_result  # Объединить результаты
@@ -27,9 +37,13 @@ if __name__ == '__main__':
     N = 16
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
-    result = fwht_rec(function)
+    result = fwht(function)
     print(f'fwht: {result}')
+
     sympy_res = sm.fwht(function)
+    values_length = len(function)
+    for i in range(values_length):
+        sympy_res[i] /= values_length
     print(f'sympy.fwht: {sympy_res}')
 
     fig = plt.figure()
