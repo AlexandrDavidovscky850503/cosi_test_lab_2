@@ -21,7 +21,7 @@ def fwht_rec(function):
     first_half = []  # Подготовка массивов
     second_half = []
 
-    for i in range(int(values_length / 2)):  # Сложение и вычитание элементов
+    for i in range(int(values_length / 2)):  # Сложение и вычитание элементов (операция "бабочка")
         first_half.append(function[i] + function[i + int(values_length / 2)])
         second_half.append(function[i] - function[i + int(values_length / 2)])
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     result = fwht(function)
     print(f'fwht: {result}')
 
-    sympy_res = sm.fwht(function)
+    sympy_res = sm.fwht(function)  # для проверки правильности результатов
     values_length = len(function)
     for i in range(values_length):
         sympy_res[i] /= values_length
