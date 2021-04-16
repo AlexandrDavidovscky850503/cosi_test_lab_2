@@ -1,5 +1,6 @@
 import numpy as np  # общие математические и числовые операции
 import matplotlib.pyplot as plt  # для построения графиков
+import scipy.fft as sc
 import random
 #import sympy as sm  # для функции fwht()
 
@@ -14,17 +15,57 @@ def windows_Hamming(function):
     return result
 
 
-def dft(function, direction):
-    n = len(function)
-    result = [complex(0, 0)] * n
+# def dft(function, direction):
+#     n = len(function)
+#     result = [complex(0, 0)] * n
+#
+#     for m in range(n):
+#         for k in range(n):
+#             result[m] += function[k] * np.exp(direction * complex(0, -1) * 2 * np.pi * m * k / n)
+#         if direction == -1:
+#             result[m] /= n
+#
+#     return result
 
-    for m in range(n):
-        for k in range(n):
-            result[m] += function[k] * np.exp(direction * complex(0, -1) * 2 * np.pi * m * k / n)
-        if direction == -1:
-            result[m] /= n
 
-    return result
+def fft(function, direction):  # self, чтобы ссылаться на самих себя
+        resultFunction = fft_r(function, direction)  # вызов рекурсивной функции FFT
+
+        if direction == -1:  # если делали прямое преобразование, делим на N каждый полученный элемент после FFT
+            valuesLength = len(function)
+            for i in range(valuesLength):
+                resultFunction[i] /= valuesLength
+
+        return resultFunction
+
+
+def fft_r(function, direction):
+        valuesLength = len(function)
+
+        if valuesLength == 1:  # Если длина вектора равна 1, вернуть function
+            return function
+        firstHalf = [complex(0, 0)] * (int(valuesLength / 2))  # Подготовка массивов для операции "Бабочка"
+        secondtHalf = [complex(0, 0)] * (int(valuesLength / 2))
+
+        # Присвоить Wn значение главного комплексного корня N-й степени из единицы
+        Wn = complex(np.cos(2*np.pi/valuesLength), direction * np.sin(2*np.pi/valuesLength))
+        w = 1  # Присвоить w = 1
+        result = [complex(0, 0)] * valuesLength
+        for i in range(int(valuesLength/2)):  # Операция "Бабочка"
+            firstHalf[i] = function[i] + function[i + int(valuesLength / 2)]
+            secondtHalf[i] = (function[i] - function[i + int(valuesLength / 2)]) * w
+            w = w * Wn
+
+        evenResult = \
+            fft_r(firstHalf, direction)  # Рекурсивный вызов БПФ для каждой из частей
+        oddResult = fft_r(secondtHalf, direction)
+        for i in range(valuesLength):  # Объединение результатов
+            if i % 2 == 0:
+                result[i] = evenResult[int(i / 2)]
+            else:
+                result[i] = oddResult[int(i / 2)]
+
+        return result
 
 # def add_hindrance(function):
 #     n = len(function)
@@ -52,9 +93,9 @@ def hff(func, x):
 
     N = len(func)
     y = [0] * N
-    for i in range(N  - 1):
+    for i in range(N - 1):
         y[i + 1] = a0 * func[i + 1] + a1 * func[i] + b1 * y[i]
-        print(y[i])
+        # print(y[i])
 
     return y
 
@@ -99,12 +140,26 @@ if __name__ == '__main__':
     arguments = np.arange(0, N) * 2 * np.pi / N
 
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
-    # function_dft = dft(function, -1)
-    # result_Hamming = windows_Hamming(function_dft)
-    #
+    # function_dft = dft(function, 1)
+    function_dft = sc.rfft(function)
+    print(function_dft)
+    a = function_dft.copy()
+    print(a)
+    # print(function_dft)
+    # print(len(function_dft))
+    # function_dft = fft(function, 1)
+    # print(len(function_dft))
+    # print(function_dft)
+    result_Hamming = windows_Hamming(function_dft)
+    # res = dft(result_Hamming, -1)
+    res = sc.ifft(result_Hamming)
+    # res = fft(result_Hamming, -1)
+
     hindrance_result = add_hindrance(function)
     # hindrance_result_dft = dft(hindrance_result, -1)
     # hindrance_result_Hamming = windows_Hamming(hindrance_result_dft)
+
+    # arguments = np.arange(0, 512) * 2 * np.pi / N
 
     fig = plt.figure()
     ax_1 = fig.add_subplot(3, 3, 1)
@@ -124,15 +179,31 @@ if __name__ == '__main__':
     # ax_1.scatter(arguments, function, color='orange')
     ax_1.grid(True)
 
+    arguments = np.arange(0, 513) * 2 * np.pi / N
+
+    ax_2.plot(arguments, res)
+    ax_2.set(title='sin(3x) + cos(x) ДПФ')
+    # ax_2.scatter(arguments, function_dft, color='orange')
+    ax_2.grid(True)
+
+
     # ax_2.plot(arguments, function_dft)
     # ax_2.set(title='sin(3x) + cos(x) ДПФ')
     # ax_2.scatter(arguments, function_dft, color='orange')
     # ax_2.grid(True)
     #
+
+    ax_3.plot(arguments, function_dft)
+    ax_3.set(title='Полосовой оконный фильтр. Окно Хэмминга')
+    # ax_3.scatter(arguments, result_Hamming, color='orange')
+    ax_3.grid(True)
+
     # ax_3.plot(arguments, result_Hamming)
     # ax_3.set(title='Полосовой оконный фильтр. Окно Хэмминга')
     # ax_3.scatter(arguments, result_Hamming, color='orange')
     # ax_3.grid(True)
+
+    arguments = np.arange(0, 1024) * 2 * np.pi / N
 
     ax_4.plot(arguments, hff(hindrance_result, 0.85))
     ax_4.set(title='Полосовой оконный фильтр. Окно Хэмминга')
