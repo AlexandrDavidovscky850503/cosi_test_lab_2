@@ -82,10 +82,15 @@ def filter_band_Hamming(function,fc):
     for i in range(M):
         h[i] /= sum
 
-        
+    result = sc.fft(function)
+    result1 = sc.fft(h)
 
+    for i in range(M):
+        result[i] *= result1[i]
 
-    return h
+    res = sc.ifft(result)
+
+    return res
 
 
 def add_hindrance(function):
@@ -118,7 +123,7 @@ def hff(func, fc):
 
 if __name__ == '__main__':
     N = 1024
-    fc =0.02
+    fc =0.14
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(1*x), arguments))
 
@@ -197,8 +202,8 @@ if __name__ == '__main__':
 
     # arguments = np.arange(0, 1024) * 2 * np.pi / N
     #
-    # ax_4.plot(arguments, hff(hindrance_result, 0.85))
-    # ax_4.set(title='Однополюсный ВЧ фильтр')
+    ax_4.plot(arguments, filter_band_Hamming(hindrance_result,fc))
+    ax_4.set(title='Однополюсный ВЧ фильтр')
     # ax_4.scatter(arguments, hff(hindrance_result, 0.9), color='orange')
     # ax_4.grid(True)
     #
