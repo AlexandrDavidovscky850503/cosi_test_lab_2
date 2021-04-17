@@ -67,26 +67,39 @@ def fft_r(function, direction):
 
         return result
 
-# def add_hindrance(function):
-#     n = len(function)
-#     result = [0] * n
-#
-#     for i in range(n):
-#         result[i] = function[i] + random.random()
-#
-#     return result
+def filter_band_Hamming(function,fc):
+    M = len(function)
+    h = [0] * M
+    for i in range(M):
+        if((i-M/2)==0):
+            h[i]=2*np.pi*fc
+        else:
+            h[i] = (np.sin(2*np.pi*fc*(i-M/2)))/(i-M/2)*(0.54 - 0.46 * np.cos((2 * np.pi * i) / M))
+
+    sum = 0
+    for i in range(M):
+        sum += h[i]
+    for i in range(M):
+        h[i] /= sum
+
+        
+
+
+    return h
+
 
 def add_hindrance(function):
     n = len(function)
     result = [0] * n
 
     for i in range(n):
-        result[i] = (np.sin(3 * 2 * np.pi * i / N) + np.cos(2 * np.pi * i / N)) + np.cos(40 * 2*np.pi * i / N)
-
+        result[i] = (function[i]) + np.cos(40 * 2*np.pi * i / N)
     return result
 
 
-def hff(func, x):
+
+def hff(func, fc):
+    x = np.exp((-2)*np.pi*fc)
     a0 = (1 + x) / 2
     a1 = (1 + x) * (-1) / 2
     b1 = x
@@ -96,66 +109,45 @@ def hff(func, x):
     for i in range(N - 1):
         y[i + 1] = a0 * func[i + 1] + a1 * func[i] + b1 * y[i]
         # print(y[i])
-
     return y
 
+# def del_freq(func,Hfreq,Lfreq):
+#     a =0
+#     return a
 
-# def hff(func, x):
-#     a0 = 0.15
-#     b1 = 0.85
-#
-#     N = len(func)
-#     y = [0] * N
-#     for i in range(N - 1):
-#         y[i + 1] = a0 * func[i + 1] + b1 * y[i]
-#
-#     return y
-
-# def hff(func, x):
-#     a0 = (1 - x) ** 4
-#     b1 = 4 * x
-#     b2 = -6 * x**2
-#     b3 = 4 * x ** 3
-#     b4 = -x ** 4
-#
-#     N = len(func)
-#     y = [0] * (N)
-#     for i in range(N - 4):
-#         y[i + 4] = a0 * func[i + 4] + b1 * y[i + 3] + b2 * y[i + 2] + b3 * y[i + 1] + b4 * y[i]
-#
-#     return y
-
-# def hff(func, X):
-#
-#     y = np.zeros(N)
-#
-#     for j in range(N):
-#         y[j] = (np.power((1 - X), 4) * func[j]) + (4 * X * y[j - 1]) + (-6 * np.power(X, 2) * y[j - 2]) \
-#                + (4 * np.power(X, 3) * y[j - 3]) + (-np.power(X, 4) * y[j - 4])
-#
-#     return y
 
 if __name__ == '__main__':
     N = 1024
+    fc =0.02
     arguments = np.arange(0, N) * 2 * np.pi / N
+    function = list(map(lambda x: np.sin(3 * x) + np.cos(1*x), arguments))
 
-    function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
-    # function_dft = dft(function, 1)
-    function_dft = sc.rfft(function)
-    print(function_dft)
-    a = function_dft.copy()
-    print(a)
+
+    # for i in range(N):
+    #     function_dft[i] = abs(function_dft[i])
+
+    hindrance_result = add_hindrance(function)
+    #
+    # function_dft = sc.rfft(hindrance_result)
+    # function_dft = del_freq(function_dft)
+    # function_res = sc.irfft(function_dft)
+
+    # function_dft = sc.fft(function)
+
+    # print(function_dft)
+    # a = function_dft.copy()
+    # print(a)
     # print(function_dft)
     # print(len(function_dft))
     # function_dft = fft(function, 1)
     # print(len(function_dft))
     # print(function_dft)
-    result_Hamming = windows_Hamming(function_dft)
-    # res = dft(result_Hamming, -1)
-    res = sc.ifft(result_Hamming)
-    # res = fft(result_Hamming, -1)
+    # result_Hamming = windows_Hamming(function_dft)
+    # # res = dft(result_Hamming, -1)
+    # res = sc.ifft(result_Hamming)
+    # # res = fft(result_Hamming, -1)
 
-    hindrance_result = add_hindrance(function)
+
     # hindrance_result_dft = dft(hindrance_result, -1)
     # hindrance_result_Hamming = windows_Hamming(hindrance_result_dft)
 
@@ -177,14 +169,14 @@ if __name__ == '__main__':
     ax_1.plot(arguments, function)
     ax_1.set(title='sin(3x) + cos(x)')
     # ax_1.scatter(arguments, function, color='orange')
-    ax_1.grid(True)
+    # ax_1.grid(True)
 
-    arguments = np.arange(0, 513) * 2 * np.pi / N
+    # arguments = np.arange(0, 513) * 2 * np.pi / N
 
-    ax_2.plot(arguments, res)
-    ax_2.set(title='sin(3x) + cos(x) ДПФ')
-    # ax_2.scatter(arguments, function_dft, color='orange')
-    ax_2.grid(True)
+    ax_2.plot(arguments, hindrance_result)
+    ax_2.set(title='sin(3x) + cos(x)(иск)')
+    # ax_2.scatter(arguments, function, color='orange')
+    # ax_2.grid(True)
 
 
     # ax_2.plot(arguments, function_dft)
@@ -193,27 +185,32 @@ if __name__ == '__main__':
     # ax_2.grid(True)
     #
 
-    ax_3.plot(arguments, function_dft)
-    ax_3.set(title='Полосовой оконный фильтр. Окно Хэмминга')
-    # ax_3.scatter(arguments, result_Hamming, color='orange')
-    ax_3.grid(True)
+    ax_3.plot(arguments, hff(hindrance_result, fc))
+    ax_3.set(title='однопол. ВЧ')
+    ax_3.scatter(arguments, hindrance_result, color='orange')
+    # ax_3.grid(True)
 
     # ax_3.plot(arguments, result_Hamming)
     # ax_3.set(title='Полосовой оконный фильтр. Окно Хэмминга')
     # ax_3.scatter(arguments, result_Hamming, color='orange')
     # ax_3.grid(True)
 
-    arguments = np.arange(0, 1024) * 2 * np.pi / N
-
-    ax_4.plot(arguments, hff(hindrance_result, 0.85))
-    ax_4.set(title='Полосовой оконный фильтр. Окно Хэмминга')
+    # arguments = np.arange(0, 1024) * 2 * np.pi / N
+    #
+    # ax_4.plot(arguments, hff(hindrance_result, 0.85))
+    # ax_4.set(title='Однополюсный ВЧ фильтр')
     # ax_4.scatter(arguments, hff(hindrance_result, 0.9), color='orange')
-    ax_4.grid(True)
-
-    ax_7.plot(arguments, hindrance_result)
-    ax_7.set(title='sin(3x) + cos(x) (иск)')
+    # ax_4.grid(True)
+    #
+    # ax_5.plot(arguments, result_Hamming)
+    # ax_5.set(title='Hamming')
+    # ax_4.scatter(arguments, hff(hindrance_result, 0.9), color='orange')
+    # ax_4.grid(True)
+    #
+    # ax_7.plot(arguments, hindrance_result)
+    # ax_7.set(title='sin(3x) + cos(x) (иск)')
     # ax_7.scatter(arguments, hindrance_result, color='orange')
-    ax_7.grid(True)
+    # ax_7.grid(True)
 
     # ax_8.plot(arguments, hindrance_result_dft)
     # ax_8.set(title='sin(3x) + cos(x) ДПФ (иск)')
