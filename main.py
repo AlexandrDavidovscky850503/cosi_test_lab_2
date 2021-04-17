@@ -69,6 +69,7 @@ def fft_r(function, direction):
 
 def filter_band_Hamming(function,fc):
     M = len(function)
+    # M=100
     h = [0] * M
     for i in range(M):
         if((i-M/2)==0):
@@ -82,13 +83,22 @@ def filter_band_Hamming(function,fc):
     for i in range(M):
         h[i] /= sum
 
-    result = sc.fft(function)
-    result1 = sc.fft(h)
+    # result = sc.fft(function)
+    # result1 = sc.fft(h)
+    #
+    # for i in range(M):
+    #     result[i] *= result1[i]
+    #
+    # res = sc.ifft(result)
 
-    for i in range(M):
-        result[i] *= result1[i]
+    # N = len(function)
+    res = [0] * M
+    # j=M
+    for j in range(M):
+        for i in range(M):
+            res[j] += function[i]*h[j-i]
 
-    res = sc.ifft(result)
+
 
     return res
 
@@ -98,7 +108,13 @@ def add_hindrance(function):
     result = [0] * n
 
     for i in range(n):
-        result[i] = (function[i]) + np.cos(40 * 2*np.pi * i / N)
+        if(i > int(n / 2)):
+            if(i < int(n / 2 + 0.2*n)):
+                result[i] = (function[i]) + np.cos(40 * 2 * np.pi * i / N)
+            else:
+                result[i] = (function[i])
+        else:
+            result[i] = (function[i])
     return result
 
 
@@ -122,7 +138,7 @@ def hff(func, fc):
 
 
 if __name__ == '__main__':
-    N = 1024
+    N = 4096
     fc =0.14
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(1*x), arguments))
@@ -188,11 +204,10 @@ if __name__ == '__main__':
     # ax_2.set(title='sin(3x) + cos(x) ДПФ')
     # ax_2.scatter(arguments, function_dft, color='orange')
     # ax_2.grid(True)
-    #
 
     ax_3.plot(arguments, hff(hindrance_result, fc))
     ax_3.set(title='однопол. ВЧ')
-    ax_3.scatter(arguments, hindrance_result, color='orange')
+    ax_3.scatter(arguments, function, color='white')
     # ax_3.grid(True)
 
     # ax_3.plot(arguments, result_Hamming)
@@ -203,7 +218,7 @@ if __name__ == '__main__':
     # arguments = np.arange(0, 1024) * 2 * np.pi / N
     #
     ax_4.plot(arguments, filter_band_Hamming(hindrance_result,fc))
-    ax_4.set(title='Однополюсный ВЧ фильтр')
+    ax_4.set(title='Hamming')
     # ax_4.scatter(arguments, hff(hindrance_result, 0.9), color='orange')
     # ax_4.grid(True)
     #
