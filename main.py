@@ -67,7 +67,7 @@ def fft_r(function, direction):
 
         return result
 
-def filter_band_Hamming(function,fc):
+def filter_band_Hamming(function,fc,fc1):
     M = len(function)
     # M=100
     h = [0] * M
@@ -77,11 +77,35 @@ def filter_band_Hamming(function,fc):
         else:
             h[i] = (np.sin(2*np.pi*fc*(i-M/2)))/(i-M/2)*(0.54 - 0.46 * np.cos((2 * np.pi * i) / M))
 
+    h1 = [0] * M
+    for i in range(M):
+        if ((i - M / 2) == 0):
+            h1[i] = 2 * np.pi * fc1
+        else:
+            h1[i] = (np.sin(2 * np.pi * fc1 * (i - M / 2))) / (i - M / 2) * (0.54 - 0.46 * np.cos((2 * np.pi * i) / M))
+
     sum = 0
     for i in range(M):
         sum += h[i]
     for i in range(M):
         h[i] /= sum
+
+    sum1 = 0
+    for i in range(M):
+        sum1 += h1[i]
+    for i in range(M):
+        h1[i] /= sum1
+
+
+    for i in range(M):
+        h1[i] = h1[i]*(-1)
+
+    h2 = [0] * M
+    for i in range(M):
+        h2[i] = h1[i]+h[i]
+
+    for i in range(M):
+        h2[i] = h2[i]*(-1)
 
     # result = sc.fft(function)
     # result1 = sc.fft(h)
@@ -92,14 +116,17 @@ def filter_band_Hamming(function,fc):
     # res = sc.ifft(result)
 
     # N = len(function)
-    res = [0] * M
+
+    res = []
     # j=M
-    for j in range(M):
-        for i in range(M):
-            res[j] += function[i]*h[j-i]
+    for i in range(M):
+        temp =0
+        for j in range(M):
+            k = np.abs(i-j)%M
+            temp += function[k]*h2[j]
 
-
-
+        temp/=M
+        res.append(temp)
     return res
 
 
@@ -108,13 +135,14 @@ def add_hindrance(function):
     result = [0] * n
 
     for i in range(n):
-        if(i > int(n / 2)):
-            if(i < int(n / 2 + 0.2*n)):
-                result[i] = (function[i]) + np.cos(40 * 2 * np.pi * i / N)
-            else:
-                result[i] = (function[i])
-        else:
-            result[i] = (function[i])
+        result[i] = (function[i]) + np.cos(35 * 2 * np.pi * i / N)
+        # if(i > int(n / 2)):
+        #     if(i < int(n / 2 + 0.2*n)):
+        #         result[i] = (function[i]) + np.cos(15 * 2 * np.pi * i / N)
+        #     else:
+        #         result[i] = (function[i])
+        # else:
+        #     result[i] = (function[i])
     return result
 
 
@@ -139,7 +167,8 @@ def hff(func, fc):
 
 if __name__ == '__main__':
     N = 4096
-    fc =0.14
+    fc =0.12
+    fc1 =0.2
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(1*x), arguments))
 
@@ -217,7 +246,7 @@ if __name__ == '__main__':
 
     # arguments = np.arange(0, 1024) * 2 * np.pi / N
     #
-    ax_4.plot(arguments, filter_band_Hamming(hindrance_result,fc))
+    ax_4.plot(arguments, filter_band_Hamming(hindrance_result,fc,fc1))
     ax_4.set(title='Hamming')
     # ax_4.scatter(arguments, hff(hindrance_result, 0.9), color='orange')
     # ax_4.grid(True)
