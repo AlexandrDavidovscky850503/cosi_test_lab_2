@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt  # для построения графиков
 
 
 def filter_band_Hamming(function, fc, fc1):
-    # M = len(function)
-    M = 2000
+    N = len(function)
+    M = int(N/10)
+    print(M)
     h = [0] * M
     for i in range(M):
         if (i-M/2) == 0:
@@ -25,7 +26,6 @@ def filter_band_Hamming(function, fc, fc1):
     sum = 0
     for i in range(M):
         sum += h[i]
-
     if sum:
         for i in range(M):
             h[i] /= sum
@@ -52,15 +52,11 @@ def filter_band_Hamming(function, fc, fc1):
     h2[int(M/2)] = h2[int(M/2)] + 1
 
     res = [0] * len(function)
-    # j=M
     for i in range(len(function)):
         if i > M:
             temp = 0
             for j in range(M):
-                # k = np.abs(i-j) % M
                 temp += function[i-j]*h2[j]
-
-            # temp /= M
             res[i] = temp
 
     return res
@@ -79,9 +75,6 @@ def add_hindrance(function):
                 result[i] = (function[i])
         else:
             result[i] = (function[i])
-
-    # for i in range(len(function)):
-    #     result[i] *= 10
 
     return result
 
@@ -102,18 +95,16 @@ def hff(func, fc):
 
 
 if __name__ == '__main__':
-    #
-    N = 8192
-    fc_hff = 0.0085
+    N = 512
+    fc_hff = 0.097
     # fc = 0
-    # fc1 = 0.000366
+    # fc1 = 0.05
 
-    fc = 0.0085
-    fc1 = 0.4
+    fc = 0.097
+    fc1 = 0.41
 
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
-
     hindrance_result = add_hindrance(function)
 
     fig = plt.figure()
@@ -135,5 +126,5 @@ if __name__ == '__main__':
     ax_4.plot(arguments, filter_band_Hamming(hindrance_result, fc, fc1))
     ax_4.set(title='Hamming')
     ax_4.scatter(arguments, function, color='white')
-
+    ax_4.plot(arguments, function, color='orange')
     plt.show()
