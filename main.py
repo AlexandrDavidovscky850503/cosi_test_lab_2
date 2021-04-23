@@ -7,8 +7,8 @@ def filter_band_Hamming(function, fc, fc1):
     M = 2000
     h = [0] * M
     for i in range(M):
-        if (i-M/2)==0:
-            h[i]=2*np.pi*fc
+        if (i-M/2) == 0:
+            h[i] = 2*np.pi*fc
         else:
             h[i] = (np.sin(2*np.pi*fc*(i-M/2)))/(i-M/2)
         h[i] *= (0.54 - 0.46 * np.cos((2 * np.pi * i) / M))
@@ -60,13 +60,8 @@ def filter_band_Hamming(function, fc, fc1):
                 # k = np.abs(i-j) % M
                 temp += function[i-j]*h2[j]
 
-
             # temp /= M
             res[i] = temp
-
-
-    # res = np.convolve(h2, function, mode='full')
-
 
     return res
 
@@ -77,7 +72,7 @@ def add_hindrance(function):
 
     for i in range(n):
         # result[i] = (function[i]) + np.cos(35 * 2 * np.pi * i / N)
-        if(i > int(n / 3)):
+        if i > int(n / 3):
             if i < int(n / 3 + 0.2*n):
                 result[i] = (function[i]) + np.cos(75 * 2 * np.pi * i / N)
             else:
@@ -109,13 +104,13 @@ def hff(func, fc):
 if __name__ == '__main__':
     #
     N = 8192
-    fc_hff = 0.009
-    fc = 0
-    fc1 = 0.000366
-    # fc = 0.01
-    # fc1 = 0.18
-    # fc = 0.000000001
-    # fc1 = 0.005
+    fc_hff = 0.0085
+    # fc = 0
+    # fc1 = 0.000366
+
+    fc = 0.0085
+    fc1 = 0.4
+
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
 
