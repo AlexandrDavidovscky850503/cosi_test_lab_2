@@ -12,6 +12,8 @@ def filter_band_Hamming(function,fc,fc1):
         else:
             h[i] = (np.sin(2*np.pi*fc*(i-M/2)))/(i-M/2)*(0.54 - 0.46 * np.cos((2 * np.pi * i) / M))
 
+
+
     h1 = [0] * M
     for i in range(M):
         if ((i - M / 2) == 0):
@@ -64,14 +66,14 @@ def add_hindrance(function):
     result = [0] * n
 
     for i in range(n):
-        result[i] = (function[i]) + np.cos(35 * 2 * np.pi * i / N)
-        # if(i > int(n / 2)):
-        #     if(i < int(n / 2 + 0.2*n)):
-        #         result[i] = (function[i]) + np.cos(75 * 2 * np.pi * i / N)
-        #     else:
-        #         result[i] = (function[i])
-        # else:
-        #     result[i] = (function[i])
+        # result[i] = (function[i]) + np.cos(35 * 2 * np.pi * i / N)
+        if(i > int(n / 3)):
+            if(i < int(n / 3 + 0.2*n)):
+                result[i] = (function[i]) + np.cos(75 * 2 * np.pi * i / N)
+            else:
+                result[i] = (function[i])
+        else:
+            result[i] = (function[i])
     return result
 
 
@@ -79,12 +81,11 @@ def add_hindrance(function):
 def hff(func, fc):
     x = np.exp((-2)*np.pi*fc)
     a0 = (1 + x) / 2
-    a1 = (1 + x) * (-1) / 2
+    a1 = (-1 - x) / 2
     b1 = x
 
     N = len(func)
     y = [0] * N
-
     for i in range(N):
         if(i>1):
             y[i] = a0 * func[i] + a1 * func[i-1] + b1 * y[i-1]
@@ -93,7 +94,7 @@ def hff(func, fc):
 
 
 if __name__ == '__main__':
-    N = 4096
+    N = 128
     fc =0.34
     fc1 =0.4
     arguments = np.arange(0, N) * 2 * np.pi / N
@@ -101,17 +102,14 @@ if __name__ == '__main__':
 
     hindrance_result = add_hindrance(function)
 
-
     fig = plt.figure()
     ax_1 = fig.add_subplot(2, 2, 1)
     ax_2 = fig.add_subplot(2, 2, 2)
     ax_3 = fig.add_subplot(2, 2, 3)
     ax_4 = fig.add_subplot(2, 2, 4)
 
-
     ax_1.plot(arguments, function)
     ax_1.set(title='sin(3x) + cos(x)')
-
 
     ax_2.plot(arguments, hindrance_result)
     ax_2.set(title='sin(3x) + cos(x)(иск)')
