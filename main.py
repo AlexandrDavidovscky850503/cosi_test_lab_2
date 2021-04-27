@@ -97,11 +97,11 @@ def hff(func, fc):
 if __name__ == '__main__':
     N = 512
     fc_hff = 0.097
-    # fc = 0
-    # fc1 = 0.05
+    fc = 0
+    fc1 = 0.05
 
-    fc = 0.097
-    fc1 = 0.41
+    # fc = 0.097
+    # fc1 = 0.41
 
     arguments = np.arange(0, N) * 2 * np.pi / N
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
