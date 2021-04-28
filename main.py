@@ -62,6 +62,19 @@ def filter_band_Hamming(function, fc, fc1):
     return res
 
 
+def fft(function, direction):
+    n = len(function)
+    result = [complex(0, 0)] * n
+
+    for m in range(n):
+        for k in range(n):
+            result[m] += function[k] * np.exp(direction * complex(0, -1) * 2 * np.pi * m * k / n)
+        if direction == -1:
+            result[m] /= n
+
+    return result
+
+
 def add_hindrance(function):
     n = len(function)
     result = [0] * n
@@ -104,7 +117,7 @@ if __name__ == '__main__':
     # fc1 = 0.41
 
     arguments = np.arange(0, N) * 2 * np.pi / N
-    arguments2 = np.arange(0, N / 2 + 1)
+    arguments2 = np.arange(0, N)
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
     hindrance_result = add_hindrance(function)
 
@@ -125,7 +138,7 @@ if __name__ == '__main__':
     ax_3.set(title='однопол. ВЧ')
     ax_3.scatter(arguments, function, color='white')
 
-    fft_res = abs(np.fft.rfft(hindrance_result))
+    fft_res = np.abs(fft(hindrance_result, 1))
     # fft_freq = np.fft.rfftfreq(N, 1/512)
 
     ax_4.plot(arguments, filter_band_Hamming(hindrance_result, fc, fc1))
