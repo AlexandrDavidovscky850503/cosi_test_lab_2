@@ -67,14 +67,14 @@ def add_hindrance(function):
     result = [0] * n
 
     for i in range(n):
-        # result[i] = (function[i]) + np.cos(35 * 2 * np.pi * i / N)
-        if i > int(n / 3):
-            if i < int(n / 3 + 0.2*n):
-                result[i] = (function[i]) + np.cos(75 * 2 * np.pi * i / N)
-            else:
-                result[i] = (function[i])
-        else:
-            result[i] = (function[i])
+        result[i] = (function[i]) + np.cos(75 * 2 * np.pi * i / N)
+        # if i > int(n / 3):
+        #     if i < int(n / 3 + 0.2*n):
+        #         result[i] = (function[i]) + np.cos(75 * 2 * np.pi * i / N)
+        #     else:
+        #         result[i] = (function[i])
+        # else:
+        #     result[i] = (function[i])
 
     return result
 
@@ -104,14 +104,16 @@ if __name__ == '__main__':
     # fc1 = 0.41
 
     arguments = np.arange(0, N) * 2 * np.pi / N
+    arguments2 = np.arange(0, N / 2 + 1)
     function = list(map(lambda x: np.sin(3 * x) + np.cos(x), arguments))
     hindrance_result = add_hindrance(function)
 
     fig = plt.figure()
-    ax_1 = fig.add_subplot(2, 2, 1)
-    ax_2 = fig.add_subplot(2, 2, 2)
-    ax_3 = fig.add_subplot(2, 2, 3)
-    ax_4 = fig.add_subplot(2, 2, 4)
+    ax_1 = fig.add_subplot(2, 3, 1)
+    ax_2 = fig.add_subplot(2, 3, 2)
+    ax_3 = fig.add_subplot(2, 3, 3)
+    ax_4 = fig.add_subplot(2, 3, 4)
+    ax_5 = fig.add_subplot(2, 3, 5)
 
     ax_1.plot(arguments, function)
     ax_1.set(title='sin(3x) + cos(x)')
@@ -123,8 +125,16 @@ if __name__ == '__main__':
     ax_3.set(title='однопол. ВЧ')
     ax_3.scatter(arguments, function, color='white')
 
+    fft_res = abs(np.fft.rfft(hindrance_result))
+    # fft_freq = np.fft.rfftfreq(N, 1/512)
+
     ax_4.plot(arguments, filter_band_Hamming(hindrance_result, fc, fc1))
     ax_4.set(title='Hamming')
     ax_4.scatter(arguments, function, color='white')
     ax_4.plot(arguments, function, color='orange')
+
+    ax_5.plot(arguments2, fft_res)
+    ax_5.set(title='FFT')
+    ax_5.scatter(arguments, function, color='white')
+
     plt.show()
